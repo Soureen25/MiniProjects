@@ -1,0 +1,29 @@
+const int pwmPin = 9;       // MOSFET gate
+const int voltagePin = A0;  // Voltage divider input
+const float targetVoltage = 4.0; // Target output voltage
+const float Kp = 30.0; // Proportional gain (tune this)
+
+void setup() {
+  pinMode(pwmPin, OUTPUT);
+  Serial.begin(9600);
+}
+
+void loop() {
+  int analogValue = analogRead(voltagePin);
+  float measuredVoltage = analogValue * (5.0 / 1023.0) * 2; // Multiply by 2 due to voltage divider
+
+  float error = targetVoltage - measuredVoltage;
+
+  static float pwm = 128; // Start with 50% duty
+  pwm += Kp * error;
+  
+  // Clamp PWM between 0 and 255
+  pwm = constrain(pwm, 0, 255);
+
+  analogWrite(pwmPin, (int)pwm);
+
+  Serial.print("Measured: "); Serial.print(measuredVoltage);
+  Serial.print(" V | PWM: "); Serial.println((int)pwm);
+
+  delay(100); // Small delay for stability
+}
